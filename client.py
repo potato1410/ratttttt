@@ -18,7 +18,7 @@ from datetime import datetime
 
 # Client settings
 SCREEN_UPDATE_INTERVAL = 0.2  # seconds between screen updates
-CLIENT_PORT = 9999  # Port that the client will listen on
+CLIENT_PORT = 443  # Port that the client will listen on (Changed from 9999)
 
 # Telegram bot settings
 TELEGRAM_BOT_TOKEN = "7994191615:AAG09oDgXcrvyKhejPwKdnfWlQPHec4DrfI"
